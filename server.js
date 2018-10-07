@@ -10,6 +10,8 @@ var bodyParser = require('body-parser');
 var app = express();
 const fetch = require('node-fetch');
 const btoa = require('btoa');
+const passport = require('passport');
+const Strategy = require("passport-discord").Strategy;
 const { catchAsync } = require('./files/utils.js');
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -50,6 +52,18 @@ db.serialize(function(){
 // http://expressjs.com/en/starter/basic-routing.html
 app.get('/', function(request, response) {
   response.sendFile(__dirname + '/views/index.html');
+});
+
+app.get('/login', function(req, res){ 
+  passport.use(new Strategy({
+    clientID: process.env.clientid,
+    clientSecret: process.env.cilentsecret,
+    callbackURL: 'xlay.glitch.me/dash',
+    scope: ["identify", "guilds", "bot"]
+  },
+  (accessToken, refreshToken, profile, done) => {
+    process.nextTick(() => done(null, profile));
+  }));
 });
 
 app.get('/success', catchAsync(async (req, res) => {
